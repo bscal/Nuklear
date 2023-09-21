@@ -24777,6 +24777,9 @@ nk_draw_selectable(struct nk_command_buffer *out,
             text.background = background->data.color;
             nk_fill_rect(out, *bounds, style->rounding, background->data.color);
             break;
+        default:
+            text.background = {};
+            break;
     }
     if (icon) {
         if (img) nk_draw_image(out, *icon, img, nk_white);
@@ -28965,6 +28968,9 @@ nk_combo_begin_symbol(struct nk_context *ctx, enum nk_symbol_type symbol, struct
             nk_fill_rect(&win->buffer, header, style->combo.rounding, background->data.color);
             nk_stroke_rect(&win->buffer, header, style->combo.rounding, style->combo.border, style->combo.border_color);
             break;
+        default:
+            sym_background = {};
+            break;
     }
     {
         struct nk_rect bounds = {0,0,0,0};
@@ -29061,6 +29067,9 @@ nk_combo_begin_symbol_text(struct nk_context *ctx, const char *selected, int len
             text.background = background->data.color;
             nk_fill_rect(&win->buffer, header, style->combo.rounding, background->data.color);
             nk_stroke_rect(&win->buffer, header, style->combo.rounding, style->combo.border, style->combo.border_color);
+            break;
+        default:
+            text.background = {};
             break;
     }
     {
