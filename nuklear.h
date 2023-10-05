@@ -4690,6 +4690,7 @@ struct nk_keyboard {
 struct nk_input {
     struct nk_keyboard keyboard;
     struct nk_mouse mouse;
+    float delta_time_seconds; // Change(bscal): easiest way to get dt from text_edit 
 };
 
 NK_API nk_bool nk_input_has_mouse_click(const struct nk_input*, enum nk_buttons);
@@ -17837,6 +17838,7 @@ nk_input_begin(struct nk_context *ctx)
     in->mouse.prev.y = in->mouse.pos.y;
     in->mouse.delta.x = 0;
     in->mouse.delta.y = 0;
+    in->delta_time_seconds = ctx->delta_time_seconds; // Change(bscal) see nk_input
     for (i = 0; i < NK_KEY_MAX; i++)
         in->keyboard.keys[i].clicked = 0;
 }
@@ -27060,10 +27062,22 @@ nk_do_edit(nk_flags *state, struct nk_command_buffer *out,
         {int i; /* keyboard input */
         int old_mode = edit->mode;
         for (i = 0; i < NK_KEY_MAX; ++i) {
+            static float heldDownTimer = 0.0f;
             if (i == NK_KEY_ENTER || i == NK_KEY_TAB) continue; /* special case */
             if (nk_input_is_key_pressed(in, (enum nk_keys)i)) {
+                heldDownTimer = -.4f;
                 nk_textedit_key(edit, (enum nk_keys)i, shift_mod, font, row_height);
                 cursor_follow = nk_true;
+            }
+            if (nk_input_is_key_down(in, (enum nk_keys)i)) // Change(bscal): handle key downs
+            {
+                heldDownTimer += in->delta_time_seconds;
+                if (heldDownTimer > 0.02f)
+                {
+                    heldDownTimer = 0;
+                    nk_textedit_key(edit, (enum nk_keys)i, shift_mod, font, row_height);
+                    cursor_follow = nk_true;
+                }
             }
         }
         if (old_mode != edit->mode) {
